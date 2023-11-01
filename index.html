@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image to PDF Converter</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        body {
+            background-color: #ADD8E6;
+        }
+        #image-holder img {
+            max-width: 100%;
+        }
+        .button {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+        .button input[type=file] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+        }
+        .button label {
+            background: linear-gradient(to right, #ff105f, #ffad06);
+            color: white;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        .button label:hover {
+            background: linear-gradient(to right, #ffad06, #ff105f);
+        }
+        #convert {
+            background: linear-gradient(to right, #ff105f, #ffad06);
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            transition-duration: 0.4s;
+            cursor: pointer;
+        }
+        #convert:hover {
+            background: linear-gradient(to right, #ffad06, #ff105f);
+            color: black;
+        }
+        #progress-bar {
+            width: 100%;
+            background-color: #f3f3f3;
+        }
+        #progress-bar div {
+            height: 30px;
+            width: 0%;
+            background-color: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <div class="button">
+        <input type="file" id="image-upload" accept="image/*">
+        <label for="image-upload"><i class="fa fa-upload"></i> Choose File</label>
+    </div>
+    <div id="image-holder"></div>
+    <button id="convert"><i class="fa fa-file-pdf-o"></i> Convert to PDF</button>
+    <div id="progress-bar"><div></div></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.js"></script>
+    <script>
+        document.getElementById('image-upload').addEventListener('change', function(e) {
+            var reader = new FileReader();
+            reader.onload = function(event) {
+                var img = new Image();
+                img.onload = function() {
+                    document.getElementById('image-holder').innerHTML = '';
+                    document.getElementById('image-holder').appendChild(img);
+                }
+                img.src = event.target.result;
+                document.getElementById('progress-bar').firstChild.style.width = '0%';
+            }
+            reader.readAsDataURL(e.target.files[0]);     
+        }, false);
+
+        document.getElementById('convert').addEventListener('click', function() {
+            var element = document.getElementById('image-holder');
+            
+            html2canvas(element).then(function(canvas) {
+                document.getElementById('progress-bar').firstChild.style.width = '50%';
+                
+                var imgData = canvas.toDataURL('image/png');
+                var doc = new jsPDF();
+                
+                doc.addImage(imgData, 'JPEG', 0, 0);
+                
+                document.getElementById('progress-bar').firstChild.style.width = '100%';
+                
+                setTimeout(function() { 
+                    doc.save("download.pdf");
+                    document.getElementById('progress-bar').firstChild.style.width = '0%';
+                }, 500);
+                
+            });
+            
+        });
+    </script>
+</body>
+</html>
